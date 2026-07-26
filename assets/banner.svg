@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="Interlock — the human interlock for self-healing CI">
+  <defs>
+    <linearGradient id="il-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0f0d"/><stop offset="1" stop-color="#0f1a17"/>
+    </linearGradient>
+    <linearGradient id="il-accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+    <radialGradient id="il-glow" cx="0.2" cy="0.38" r="0.62">
+      <stop offset="0" stop-color="#34d399" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#34d399" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="il-dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#17271f"/>
+    </pattern>
+    <marker id="il-tip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2f4a3f"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#il-bg)"/>
+  <rect width="1280" height="640" fill="url(#il-dots)" opacity="0.55"/>
+  <rect width="1280" height="640" fill="url(#il-glow)"/>
+
+  <!-- ── identity ─────────────────────────────────────────────── -->
+  <g transform="translate(0,-34)" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">
+    <text x="72" y="228" font-size="62" font-weight="bold" letter-spacing="6" fill="#f8fafc">INTERLOCK</text>
+    <rect x="74" y="256" width="272" height="6" rx="3" fill="url(#il-accent)"/>
+    <text x="74" y="318" font-size="27" fill="#cbd5c8">It reads the failure.</text>
+    <text x="74" y="352" font-size="27" fill="#cbd5c8">It writes the fix.</text>
+    <text x="74" y="386" font-size="27" fill="#34d399">It waits.</text>
+    <text x="74" y="446" font-size="17" letter-spacing="1" fill="#6f877f">SELF-HEALING CI, WITH A HUMAN INTERLOCK</text>
+  </g>
+
+  <!-- ── mechanism: a failure routed through the gate ─────────── -->
+  <g transform="translate(0,-34)" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace">
+
+    <!-- inbound -->
+    <text x="512" y="286" font-size="16" fill="#6f877f">run 4530</text>
+    <circle cx="524" cy="320" r="7" fill="#f87171"/>
+    <path d="M 531 320 H 640" fill="none" stroke="#2f4a3f" stroke-width="3"/>
+
+    <!-- the gate -->
+    <rect x="640" y="284" width="142" height="72" rx="10" fill="#0d1714" stroke="url(#il-accent)" stroke-width="2.5"/>
+    <text x="711" y="316" font-size="21" font-weight="bold" letter-spacing="3" fill="#f8fafc" text-anchor="middle">GATE</text>
+    <text x="711" y="338" font-size="14" fill="#6f877f" text-anchor="middle">interlock.json</text>
+
+    <!-- right-angle routing to three outcomes -->
+    <g fill="none" stroke="#2f4a3f" stroke-width="3" stroke-linejoin="round">
+      <path d="M 782 320 H 830"/>
+      <path d="M 830 320 V 192 H 892" marker-end="url(#il-tip)"/>
+      <path d="M 830 320 H 892" marker-end="url(#il-tip)"/>
+      <path d="M 830 320 V 452 H 892" marker-end="url(#il-tip)"/>
+    </g>
+    <circle cx="830" cy="320" r="6" fill="#34d399"/>
+
+    <!-- outcomes -->
+    <circle cx="910" cy="192" r="6" fill="#34d399"/>
+    <text x="934" y="198" font-size="22" font-weight="bold" letter-spacing="2" fill="#34d399">AUTO</text>
+    <text x="934" y="224" font-size="16" fill="#7d9490">patch emitted · exit 0</text>
+
+    <circle cx="910" cy="320" r="6" fill="#fbbf24"/>
+    <text x="934" y="326" font-size="22" font-weight="bold" letter-spacing="2" fill="#fbbf24">HELD</text>
+    <text x="934" y="352" font-size="16" fill="#7d9490">a person decides · exit 75</text>
+
+    <circle cx="910" cy="452" r="6" fill="#f87171"/>
+    <text x="934" y="458" font-size="22" font-weight="bold" letter-spacing="2" fill="#f87171">REFUSE</text>
+    <text x="934" y="484" font-size="16" fill="#7d9490">never patched · exit 1</text>
+
+    <!-- the gate remembers a clearance: same failure, no second question -->
+    <path d="M 762 358 C 762 472 660 472 660 358" fill="none" stroke="#fbbf24"
+          stroke-width="2" stroke-dasharray="7 7" opacity="0.8"/>
+    <circle cx="660" cy="358" r="4" fill="#fbbf24" opacity="0.8"/>
+    <text x="711" y="508" font-size="16" fill="#a08246" text-anchor="middle">warrant · cleared once, honoured 14 days</text>
+  </g>
+
+  <text x="72" y="600" font-family="ui-monospace, 'Cascadia Mono', Consolas, monospace"
+        font-size="17" letter-spacing="0.5" fill="#54685f">github-actions · human-in-the-loop · audited · zero dependencies</text>
+</svg>

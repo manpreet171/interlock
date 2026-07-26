@@ -1,0 +1,7 @@
+2026-07-21T11:02:44.4410021Z ##[group]Run echo "::set-output name=version::$(cat VERSION)"
+2026-07-21T11:02:44.5512091Z echo "::set-output name=version::$(cat VERSION)"
+2026-07-21T11:02:44.5990012Z shell: /usr/bin/bash -e {0}
+2026-07-21T11:02:44.5991773Z ##[endgroup]
+2026-07-21T11:02:44.7710223Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/
+2026-07-21T11:02:44.8801442Z Error: Unable to process command '::set-output name=version::' successfully.
+2026-07-21T11:02:44.9120114Z ##[error]Process completed with exit code 1.

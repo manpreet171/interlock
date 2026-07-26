@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/manpreet171/interlock/main/schema/policy.schema.json",
+  "title": "interlock policy",
+  "description": "What an agent may change in this repository when CI breaks, what needs a person, and what it must never touch.",
+  "type": "object",
+  "required": ["version", "owner", "mode", "scope", "clearance", "warrant", "limits", "record"],
+  "additionalProperties": false,
+  "definitions": {
+    "failureClass": {
+      "type": "string",
+      "enum": [
+        "missing-python-module",
+        "set-output-deprecated",
+        "lockfile-drift",
+        "npm-peer-conflict",
+        "pip-resolution-conflict",
+        "node-missing-module",
+        "deprecated-action-version",
+        "python-syntax-error",
+        "missing-secret",
+        "job-timeout",
+        "runner-oom",
+        "disk-full",
+        "test-failure",
+        "unknown"
+      ]
+    }
+  },
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "owner": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The person or team answerable for this policy. Not a placeholder."
+    },
+    "mode": {
+      "enum": ["off", "shadow", "normal", "strict"],
+      "description": "off = gate everything through. shadow = record verdicts, block nothing. normal = enforce. strict = every patch gets a person and warrants are ignored."
+    },
+    "scope": {
+      "type": "object",
+      "required": ["allow", "deny"],
+      "additionalProperties": false,
+      "description": "Checked against the files a proposed patch would touch, not against anything the agent claims.",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Globs. A patch touching anything outside these is refused."
+        },
+        "deny": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Globs. Wins over allow."
+        }
+      }
+    },
+    "clearance": {
+      "type": "object",
+      "required": ["auto", "hold", "refuse"],
+      "additionalProperties": false,
+      "description": "Every failure class must appear in exactly one bucket.",
+      "properties": {
+        "auto": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/failureClass" },
+          "description": "Fixed without asking. Only classes with a deterministic fix belong here."
+        },
+        "hold": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/failureClass" },
+          "description": "Paused until a person clears or rejects it."
+        },
+        "refuse": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/failureClass" },
+          "description": "No agent may patch these. A person handles them by hand."
+        }
+      }
+    },
+    "warrant": {
+      "type": "object",
+      "required": ["reuse", "expires_after_days", "max_uses"],
+      "additionalProperties": false,
+      "description": "A warrant is a past clearance for one exact failure under one exact set of rules.",
+      "properties": {
+        "reuse": {
+          "type": "boolean",
+          "description": "Whether a past clearance can cover the same failure again."
+        },
+        "expires_after_days": { "type": "number", "exclusiveMinimum": 0, "maximum": 90 },
+        "max_uses": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "required": ["max_files_changed", "max_lines_changed"],
+      "additionalProperties": false,
+      "description": "Size ceilings. A patch over the ceiling is held, never auto-cleared.",
+      "properties": {
+        "max_files_changed": { "type": "number", "exclusiveMinimum": 0 },
+        "max_lines_changed": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "record": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Where the ledger is written. Commit it."
+        }
+      }
+    }
+  }
+}

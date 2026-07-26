@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: interlock's own policy must be valid
+        run: node bin/interlock.mjs lint
+      - name: every example policy must be valid
+        run: |
+          for policy in examples/*/interlock.json; do
+            echo "--- $policy"
+            node bin/interlock.mjs lint "$policy"
+          done
+      - name: tests
+        run: node test/run.mjs
+
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # A pre-cleared failure emits a patch and exits 0.
+      - name: missing module is auto-cleared
+        run: |
+          node bin/interlock.mjs gate examples/missing-module/logs/run-4471.log \
+            --root examples/missing-module --repo acme/api --run 4471 > fix.diff
+          grep -q '^+requests$' fix.diff
+
+      # The patch it wrote has to actually apply.
+      - name: the emitted patch applies
+        run: |
+          node bin/interlock.mjs diagnose examples/missing-module/logs/run-4471.log \
+            --root examples/missing-module --json \
+            | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>process.stdout.write(JSON.parse(s).proposal.patch))" \
+            > clean.diff
+          git apply --check --directory=examples/missing-module clean.diff
+
+      # A held failure exits 75 — waiting, not broken.
+      - name: set-output is held for a person
+        run: |
+          set +e
+          node bin/interlock.mjs gate examples/deprecated-set-output/logs/run-4502.log \
+            --root examples/deprecated-set-output --repo acme/api --run 4502
+          test $? -eq 75
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Not executed — it needs langgraph and a token. Parsing is what we can check.
+      - name: the langgraph example parses
+        run: python -m py_compile integrations/langgraph/graph.py

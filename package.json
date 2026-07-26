@@ -1,0 +1,46 @@
+{
+  "name": "interlock-ci",
+  "version": "1.0.0",
+  "description": "The human interlock for self-healing CI. An agent can fix your broken pipeline — interlock decides what it may fix alone, what needs a person, and what it must never touch.",
+  "type": "module",
+  "bin": {
+    "interlock": "bin/interlock.mjs"
+  },
+  "files": [
+    "bin",
+    "schema",
+    "AGENT-RULES.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test/run.mjs"
+  },
+  "author": {
+    "name": "Manpreet Singh",
+    "email": "singh.manpreet171900@gmail.com",
+    "url": "https://www.linkedin.com/in/manpreet17/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manpreet171/interlock.git"
+  },
+  "homepage": "https://github.com/manpreet171/interlock#readme",
+  "bugs": {
+    "url": "https://github.com/manpreet171/interlock/issues"
+  },
+  "keywords": [
+    "ci-cd",
+    "github-actions",
+    "human-in-the-loop",
+    "ai-agents",
+    "self-healing",
+    "devops",
+    "mlops",
+    "interlock"
+  ]
+}
