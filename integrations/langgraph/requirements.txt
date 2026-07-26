@@ -1,0 +1,4 @@
+langgraph
+langgraph-checkpoint-sqlite
+# only needed for the diagnose_with_llm node (unmatched failures)
+langchain-anthropic

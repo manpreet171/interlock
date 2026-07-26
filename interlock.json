@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/manpreet171/interlock/main/schema/policy.schema.json",
+  "version": 1,
+  "owner": "Manpreet Singh <singh.manpreet171900@gmail.com>",
+  "mode": "normal",
+  "scope": {
+    "allow": [
+      "requirements*.txt",
+      "requirements/*.txt",
+      "package.json",
+      "package-lock.json",
+      ".github/workflows/*.yml"
+    ],
+    "deny": [
+      "**/*deploy*",
+      "**/*release*",
+      "infra/**",
+      "terraform/**",
+      "**/*secret*",
+      "**/*.pem",
+      "**/*.key"
+    ]
+  },
+  "clearance": {
+    "auto": [
+      "missing-python-module"
+    ],
+    "hold": [
+      "set-output-deprecated",
+      "lockfile-drift",
+      "node-missing-module",
+      "npm-peer-conflict",
+      "pip-resolution-conflict",
+      "deprecated-action-version",
+      "unknown"
+    ],
+    "refuse": [
+      "missing-secret",
+      "job-timeout",
+      "runner-oom",
+      "disk-full",
+      "test-failure",
+      "python-syntax-error"
+    ]
+  },
+  "warrant": {
+    "reuse": true,
+    "expires_after_days": 14,
+    "max_uses": 5
+  },
+  "limits": {
+    "max_files_changed": 2,
+    "max_lines_changed": 20
+  },
+  "record": {
+    "path": ".interlock/ledger.jsonl"
+  }
+}

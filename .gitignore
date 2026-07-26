@@ -1,0 +1,12 @@
+# marketing drafts stay private
+marketing/
+
+# running the examples writes a ledger — that is state, not source
+examples/**/.interlock/
+
+node_modules/
+*.log
+!examples/**/logs/*.log
+*.diff
+.DS_Store
+Thumbs.db

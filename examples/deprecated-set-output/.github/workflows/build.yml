@@ -1,0 +1,15 @@
+name: build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute version
+        id: ver
+        run: |
+          echo "::set-output name=version::$(cat VERSION)"
+          echo "::set-output name=short_sha::${GITHUB_SHA::7}"
+      - name: Report
+        run: echo "built ${{ steps.ver.outputs.version }} at ${{ steps.ver.outputs.short_sha }}"

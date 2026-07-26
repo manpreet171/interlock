@@ -1,0 +1,7 @@
+2026-07-24T18:47:09.1120033Z ##[group]Run echo "::set-output name=version::$(cat VERSION)"
+2026-07-24T18:47:09.3391120Z echo "::set-output name=version::$(cat VERSION)"
+2026-07-24T18:47:09.4002913Z Working directory: /home/runner/work/api/api/checkout-9f3ac1b
+2026-07-24T18:47:09.4881002Z ##[endgroup]
+2026-07-24T18:47:10.0021994Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/
+2026-07-24T18:47:10.5512001Z Error: Unable to process command '::set-output name=version::' successfully.
+2026-07-24T18:47:10.7712330Z ##[error]Process completed with exit code 1.

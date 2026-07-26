@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/manpreet171/interlock/main/schema/ledger-entry.schema.json",
+  "title": "interlock ledger entry",
+  "description": "One line of .interlock/ledger.jsonl. The file is JSON Lines: one object per line, appended, never rewritten.",
+  "type": "object",
+  "required": ["seq", "ts", "event", "id", "fingerprint", "class", "rules", "mode"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1, "description": "Position in the file. Gaps mean lines were removed." },
+    "ts": { "type": "string", "format": "date-time" },
+    "event": {
+      "enum": ["auto", "hold", "refuse", "cleared", "rejected", "reuse", "observed", "pass"],
+      "description": "auto/hold/refuse are gate verdicts. cleared/rejected are human decisions. reuse means a past clearance covered this run. observed is shadow mode."
+    },
+    "id": { "type": "string", "pattern": "^h-[0-9a-f]{8}$" },
+    "of": { "type": "string", "description": "On cleared/rejected: the id of the hold being resolved." },
+    "warrant": { "type": "string", "description": "On reuse: the id of the clearance being reused." },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{12}$",
+      "description": "Hash of the failure class plus its normalised evidence. The same break always produces the same value."
+    },
+    "class": { "type": "string" },
+    "repo": { "type": "string" },
+    "run": { "type": "string" },
+    "verdict": { "enum": ["auto", "hold", "refuse", "pass"] },
+    "reason": { "type": "string", "description": "Why this verdict, in words a person can argue with." },
+    "by": { "type": "string", "description": "Who signed off. Required on cleared and rejected." },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "proposal": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["patch", "command", "none"] },
+        "note": { "type": "string" },
+        "patch": { "type": ["string", "null"] },
+        "command": { "type": ["string", "null"] }
+      }
+    },
+    "rules": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{12}$",
+      "description": "Hash of the enforcing parts of the policy at the moment of the decision. A clearance only carries while this matches."
+    },
+    "mode": { "enum": ["off", "shadow", "normal", "strict"] }
+  }
+}
