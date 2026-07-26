@@ -583,8 +583,9 @@ function cmdInit(root, f) {
   say("");
   say("Next:");
   say(dim("  1. ") + 'set "owner" to a real person, then run ' + cyan("interlock lint"));
-  say(dim("  2. ") + "try it:  " + cyan("interlock gate examples/missing-module/run.log"));
-  say(dim("  3. ") + "run a week in " + bold("shadow") + " mode before you trust it.");
+  say(dim("  2. ") + "grab a build that broke:  " + cyan("gh run view <id> --log-failed > run.log"));
+  say(dim("  3. ") + "see what it makes of it:  " + cyan("interlock diagnose run.log"));
+  say(dim("  4. ") + "run a week in " + bold("shadow") + " mode before you trust it.");
 }
 
 function cmdLint(root, f) {
