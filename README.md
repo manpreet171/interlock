@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Interlock — self-healing CI, with a human interlock" width="100%"/>
+  <img src="assets/banner.svg" alt="Interlock — it can fix it, but may it?" width="100%"/>
 </p>
 
 <h1 align="center">Interlock</h1>
 
-<p align="center"><strong>Self-healing CI, with a human interlock.<br/>It reads the failure. It writes the fix. It waits.</strong></p>
+<p align="center"><strong>Self-healing CI, with a human interlock.<br/>It can fix it. May it?</strong></p>
 
 <p align="center">Created by <a href="https://www.linkedin.com/in/manpreet17/">Manpreet Singh</a></p>
 
