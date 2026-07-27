@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import subprocess
 from typing import Literal, TypedDict
 
@@ -251,14 +252,21 @@ def build(checkpoint_path: str = ".interlock/checkpoints.sqlite"):
 
     graph.add_edge(START, "fetch_logs")
     graph.add_edge("fetch_logs", "diagnose")
-    graph.add_conditional_edges("diagnose", route_after_diagnose)
+    # The explicit destination lists are not decoration — they let LangGraph
+    # draw and validate the graph instead of inferring edges at runtime.
+    graph.add_conditional_edges("diagnose", route_after_diagnose, ["diagnose_with_llm", "gate"])
     graph.add_edge("diagnose_with_llm", "gate")
-    graph.add_conditional_edges("gate", route_after_gate)
-    graph.add_conditional_edges("approval_gate", route_after_approval)
+    graph.add_conditional_edges("gate", route_after_gate, ["create_pr", "approval_gate", "notify_human"])
+    graph.add_conditional_edges("approval_gate", route_after_approval, ["create_pr", END])
     graph.add_edge("create_pr", END)
     graph.add_edge("notify_human", END)
 
-    return graph.compile(checkpointer=SqliteSaver.from_conn_string(checkpoint_path))
+    # SqliteSaver.from_conn_string() is a context manager — it closes the
+    # connection on exit, so it is wrong for a run that pauses for days and
+    # resumes in a different process. Construct it directly instead.
+    os.makedirs(os.path.dirname(checkpoint_path) or ".", exist_ok=True)
+    conn = sqlite3.connect(checkpoint_path, check_same_thread=False)
+    return graph.compile(checkpointer=SqliteSaver(conn))
 
 
 def main() -> None:
@@ -283,10 +291,12 @@ def main() -> None:
             {"repo_name": args.repo, "run_id": args.run}, config
         )
 
-    if final.get("pr_url"):
-        print(f"opened {final['pr_url']}")
-    elif final.get("verdict") == "hold":
+    # An interrupted run comes back with __interrupt__ set — that is the signal
+    # the graph paused, not that anything failed.
+    if final.get("__interrupt__"):
         print(f"held — resume with: python graph.py --resume {thread} --approve")
+    elif final.get("pr_url"):
+        print(f"opened {final['pr_url']}")
     else:
         print(f"{final.get('verdict')}: {final.get('reason')}")
 
