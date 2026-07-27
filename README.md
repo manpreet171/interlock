@@ -37,6 +37,20 @@ interlock.json  →  what may become one, and by whom     (this is Interlock)
 Branch protection guards the merge. Nothing guards the moment a machine decided
 something was worth changing.
 
+## Who it acts like
+
+Everyone has worked with him. He isn't against automation. He's against the
+*specific* automation that took prod down one Friday in 2019, and he has not
+forgotten which file it edited.
+
+Show him a missing dependency pin and he waves it through without looking up.
+Show him a patch to the deploy workflow and he doesn't finish reading the diff.
+
+He is not slow. He is fast about exactly the things that are safe to be fast
+about, and that list took him a decade to write.
+
+**Interlock is that person, written down.**
+
 ## The 2am version
 
 Your agent reads a failed build, concludes the fix is a tweak to the deploy
@@ -54,14 +68,9 @@ and in a reviewed file, that nothing automatic touches deploys.
 
 ## Why
 
-Every team already governs this — just too late. `CODEOWNERS`, required reviews
-and environment approvals are good, and they all act on a pull request that
-already exists. That is the right control for a human contributor, who had a
-reason you can ask about.
-
-For an agent that opened forty PRs this week, "looks plausible" is the entire
-review. The decision worth governing happened one step earlier, when the fix was
-proposed — and no repo has a file describing that moment.
+Every existing control acts on a pull request that already exists. That is right
+for a human contributor, who had a reason you can ask about. For an agent that
+opened forty PRs this week, "looks plausible" is the entire review.
 
 So teams pick one of two bad answers. **Fully autonomous**, which is fine until
 the day a transient network error looks like a config bug. Or **fully manual**,
@@ -147,11 +156,9 @@ timestamps, run ids, runner paths, commit hashes and line numbers are stripped
 out. The same break always hashes the same. Different breaks never collide.
 
 That is what makes an approval *specific*. Without it, the only permissions you
-can express are "yes, this once" and "yes, forever". With it you get the one
-people actually want — **"yes, to this."**
-
-And because the fingerprint comes from the log, the thing asking for permission
-cannot forge it.
+can express are "yes, this once" and "yes, forever" — and what people actually
+want is **"yes, to this."** Because the fingerprint comes from the log, the thing
+asking for permission cannot forge it.
 
 Each clearance is also stamped with a **rules hash** covering the enforcing parts
 of your policy. Loosen `scope.allow` and every past clearance dies with it:
@@ -177,10 +184,35 @@ another.
 
 Depth, and the part most people skip for each: [`docs/pillars.md`](docs/pillars.md).
 
+## The whole decision, in order
+
+Seven questions. **Stop at the first one that answers.**
+
+```
+1. Is this failure class on the refuse list?      REFUSE   not by anyone, ever
+2. Does the patch touch a denied file?            REFUSE   scope beats class
+3. Does it touch a file that is not allowed?      REFUSE   silence is not permission
+4. Is there no deterministic fix for this?        HOLD     a person writes this one
+5. Is the patch bigger than you said it would be? HOLD     size is a smell test
+6. Is the class pre-cleared in the policy?        AUTO     decided in advance, in a PR
+7. Did a person clear this exact failure before?  AUTO     the warrant still stands
+
+   nothing answered?                              HOLD     the default is ask
+```
+
+Two properties fall out of the order, and both are deliberate. **Scope outranks
+class** — a pre-cleared failure is still refused if its fix lands somewhere it
+may not. And **a warrant is consulted last**, so it can only turn a hold into an
+auto. It can never rescue a refuse.
+
+In `strict` mode, rungs 6 and 7 are switched off: everything that is not a
+refuse becomes a hold.
+
 ## What it will never do
 
-A safety tool that quietly relaxes is worse than none, because you stop watching
-it. So interlock:
+He isn't against automation — he's against the specific automation that took
+prod down. A safety tool that quietly relaxes is worse than none, because you
+stop watching it. So interlock:
 
 - **never widens its own scope** — scope is read off the diff it built, not off
   anything the agent claims about itself
@@ -282,7 +314,8 @@ credentials. A tool that both decides and commits is a tool with no gap in it.
 **Why so few automatic fixes?**
 Because most CI failures do not have one right answer, and a confidently wrong
 patch to a build pipeline costs a team more than a red build does. Interlock
-would rather say "I do not know what to do here" than improvise.
+would rather say "I do not know what to do here" than improvise. He has seen a
+confident patch before.
 
 **Why "Interlock"?**
 In railway signalling, an interlock is the mechanism that makes an unsafe move
