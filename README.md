@@ -94,35 +94,42 @@ Exit 0, patch on stdout, pipe it into `git apply`. A failure the policy does
   held as h-627fdffd  →  interlock clear h-627fdffd   or   interlock reject h-627fdffd
 ```
 
-Somebody looks at it once — `--by` is required, so every clearance has a name:
-
-```
-$ interlock clear h-627fdffd --by "Manpreet Singh" --reason "outputs identical"
-✔ cleared h-627fdffd  by Manpreet Singh
-  warrant covers fingerprint 1c59f09f5474 for 14 days
-  valid only while rules 640490871853 are unchanged
-```
-
-Three days later the same build breaks the same way — new run id, new timestamps,
-new runner path:
+Somebody looks at it once — `--by` is required, so every clearance has a name on
+it. Three days later the same build breaks the same way, and nobody is asked:
 
 ```
   AUTO  warrant h-627fdffd — this exact failure was cleared by Manpreet Singh (use 1/5)
 ```
 
-**It does not ask again.** A different failure still does, and always will. Both
-paths run from a clean clone — see [`examples/`](examples/).
+Both paths run from a clean clone — see [`examples/`](examples/).
 
 ## The thing you cannot fake
 
-That `1c59f09f5474` is a **fingerprint** — a hash of the failure's evidence after
-timestamps, run ids, runner paths, commit hashes and line numbers are stripped
-out. It is what makes an approval *specific*: not "yes, this once" and not "yes,
-forever", but **"yes, to this."** And since it comes from the log, the thing
-asking for permission cannot forge it.
+```mermaid
+sequenceDiagram
+    participant CI as GitHub Actions
+    participant IL as interlock
+    participant P as a person
 
-Each clearance also carries a **rules hash**, so loosening `scope.allow` kills
-every clearance given under the old rules:
+    CI->>IL: run 4502 failed
+    IL->>IL: fingerprint 1c59f09f5474
+    IL-->>CI: HOLD · exit 75 · waiting, not failed
+    P->>IL: clear h-627fdffd --by "Manpreet Singh"
+    IL->>IL: warrant · 14 days · rules 640490871853
+
+    Note over CI,P: three days later — new run id, new timestamps, new runner path
+
+    CI->>IL: run 4530 failed
+    IL->>IL: same fingerprint 1c59f09f5474
+    IL-->>CI: AUTO · exit 0 + patch · nobody was asked
+```
+
+That `1c59f09f5474` is a **fingerprint** — a hash of the failure's evidence once
+timestamps, run ids, runner paths, commit hashes and line numbers are stripped
+out. It makes an approval *specific*: not "yes, this once", not "yes, forever",
+but **"yes, to this"** — and since it comes from the log, the thing asking for
+permission cannot forge it. Each clearance also carries a **rules hash**, so
+loosening `scope.allow` kills every clearance given under the old rules:
 
 ```
 $ interlock log --verify
@@ -159,23 +166,19 @@ Seven questions — **stop at the first one that answers.**
 ```
 
 Two properties fall out of the order: **scope outranks class**, so a pre-cleared
-failure is still refused if its fix lands somewhere it may not — and **a warrant
-is consulted last**, so it can only turn a hold into an auto, never rescue a
-refuse. In `strict` mode rungs 6 and 7 switch off entirely.
+failure is refused if its fix lands somewhere it may not — and **a warrant is
+consulted last**, so it can only turn a hold into an auto, never rescue a refuse.
+`strict` mode switches rungs 6 and 7 off entirely. Drawn out in
+[`docs/pillars.md`](docs/pillars.md).
 
 ## What it will never do
 
 A safety tool that quietly relaxes is worse than none, because you stop watching
-it. So interlock:
-
-- **never widens its own scope** — scope is read off the diff it built, not off
-  anything the agent claims about itself
-- **never guesses a version number** — a deprecated action gets reported, not
-  bumped on a hunch
-- **never writes a secret** — missing credentials are a person walking to a
-  settings page
-- **never carries a clearance across a rule change**
-- **never turns a red test green** — a failing test is the pipeline working
+it. So interlock **never widens its own scope** (scope is read off the diff it
+built, not off anything the agent claims), **never guesses a version number**
+(a deprecated action gets reported, not bumped on a hunch), **never writes a
+secret**, **never carries a clearance across a rule change**, and **never turns a
+red test green** — a failing test is the pipeline working.
 
 ## The CLI
 
@@ -212,21 +215,19 @@ and writes a JSON line.
 
 ## Does it work?
 
-35 tests cover fingerprint stability, patches surviving `git apply`, scope
-denial, warrant expiry and reuse limits, rule-change invalidation, and every exit
-code — on Node 18, 20 and 22.
-
-**Not measured yet:** how much engineering time this saves in a real
-organisation. That needs a team running it for a quarter, and a number published
-before then would be one I made up.
+35 tests on Node 18, 20 and 22 cover fingerprint stability, patches surviving
+`git apply`, scope denial, warrant expiry and reuse limits, rule-change
+invalidation, and every exit code. **Not measured yet:** how much engineering
+time this saves in a real organisation — that needs a team running it for a
+quarter, and a number published before then would be one I made up.
 
 ## FAQ
 
 **Is this a replacement for branch protection?**
 No — it is the layer above. Branch protection governs the merge; interlock
 governs whether a change should have been proposed at all. Dependabot and
-Renovate are complements too: they propose *known upgrades on a schedule*,
-interlock governs *unplanned repairs to a broken pipeline*.
+Renovate are complements: they propose *known upgrades on a schedule*, interlock
+governs *unplanned repairs to a broken pipeline*.
 
 **Do I need an LLM, and why so few automatic fixes?**
 No LLM required. Fourteen failure classes are matched by rule and only three
@@ -250,6 +251,4 @@ the railway down. It makes going fast survivable.
 
 If you put this in front of a real pipeline, I would like to hear which failure
 class you added first and which bucket you put it in — those are the interesting
-decisions.
-
-[MIT](LICENSE) © Manpreet Singh
+decisions. [MIT](LICENSE) © Manpreet Singh
