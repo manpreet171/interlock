@@ -177,16 +177,56 @@ PR, that line is what shows the cost.
 
 ## How they fit together
 
-```
-log ──► Signature ──► what broke, named stably
-         │
-         ├─► Clearance ──► auto | hold | refuse   (by class)
-         ├─► Scope     ──► refuse if the patch lands somewhere it may not
-         ├─► Limits    ──► hold if the patch is bigger than expected
-         └─► Warrant   ──► auto if this exact failure was cleared before
-                             │
-                             └─► Record ──► every one of the above, appended
+```mermaid
+flowchart TD
+    LOG[CI log] --> SIG["Signature<br/>class + fingerprint"]
+    SIG --> R1{"1 · on the refuse list?"}
+    R1 -->|yes| REF["REFUSE · exit 1"]
+    R1 -->|no| R2{"2 · patch touches a denied file?"}
+    R2 -->|yes| REF
+    R2 -->|no| R3{"3 · outside scope.allow?"}
+    R3 -->|yes| REF
+    R3 -->|no| R4{"4 · no deterministic fix?"}
+    R4 -->|yes| HOLD["HOLD · exit 75"]
+    R4 -->|no| R5{"5 · over the limits?"}
+    R5 -->|yes| HOLD
+    R5 -->|no| R6{"6 · class pre-cleared?"}
+    R6 -->|yes| AUTO["AUTO · exit 0 · patch on stdout"]
+    R6 -->|no| R7{"7 · live warrant for this fingerprint?"}
+    R7 -->|yes| AUTO
+    R7 -->|no| HOLD
+    HOLD --> PERSON["a person clears or rejects"]
+    PERSON -->|rejected| STOP["nothing is emitted"]
+    PERSON -->|cleared| WAR[("warrant<br/>fingerprint + rules hash")]
+    WAR -.->|"next time the same break happens"| R7
 ```
 
 Refuse always wins. Scope is checked before size. A warrant is the last thing
 consulted, and it can only turn a hold into an auto — never a refuse.
+
+## The life of a warrant
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CI as GitHub Actions
+    participant IL as interlock
+    participant P as a person
+    participant L as ledger.jsonl
+
+    CI->>IL: run 4502 failed
+    IL->>IL: fingerprint 1c59f09f5474
+    IL->>L: hold h-627fdffd
+    IL-->>CI: exit 75 — waiting, not failed
+    P->>IL: clear h-627fdffd --by "Manpreet Singh"
+    IL->>L: cleared + warrant (14 days, rules 640490871853)
+
+    Note over CI,L: three days later — new run id, new timestamps, new runner path
+
+    CI->>IL: run 4530 failed
+    IL->>IL: same fingerprint 1c59f09f5474
+    IL->>L: reuse (use 1/5)
+    IL-->>CI: exit 0 + patch, no person involved
+
+    Note over IL,L: loosen scope.allow and the rules hash changes —<br/>the warrant dies and run 4530 stops again
+```

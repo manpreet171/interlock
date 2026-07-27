@@ -5,22 +5,36 @@ A self-healing CI agent that asks interlock what it is allowed to do.
 > **Honest scope.** [`graph.py`](graph.py) is a reference implementation. It
 > needs `langgraph`, a GitHub token, and network access, so this repo's CI does
 > not run it — it is syntax-checked, not executed. The interlock half of the
-> loop is covered by 35 tests (`npm test`). Library APIs move; if
-> `interrupt()` or `SqliteSaver` have shifted, check the LangGraph docs.
+> loop is covered by 35 tests (`npm test`).
+>
+> The LangGraph API surface used here — `interrupt()`, `Command(resume=...)`,
+> `add_conditional_edges` with explicit destinations, and the `SqliteSaver`
+> constructor — was checked against the current LangGraph documentation rather
+> than written from memory. APIs still move; if something has shifted, the docs
+> win over this file.
 
 ## The shape
 
-```
-fetch_logs ──► diagnose ──► gate ──┬── auto   ──► create_pr
-                  │                ├── hold   ──► approval_gate ──► create_pr
-                  │                └── refuse ──► notify_human (end)
-                  └── unknown ──► diagnose_with_llm ──► gate
+```mermaid
+flowchart LR
+    S([START]) --> F[fetch_logs]
+    F --> D[diagnose]
+    D -->|"class = unknown"| L["diagnose_with_llm<br/><i>the only LLM in the graph</i>"]
+    L --> G
+    D -->|"class matched by rule"| G{"gate<br/><b>interlock decides</b>"}
+    G -->|auto| P[create_pr]
+    G -->|hold| A["approval_gate<br/>interrupt()"]
+    G -->|refuse| N[notify_human]
+    A -->|cleared| P
+    A -->|rejected| E([END])
+    P --> E
+    N --> E
 ```
 
-The interesting line is the last one. When no rule matches, an LLM writes the
-patch — and that patch **still goes through the gate**. The model is one more
-proposer, not an authority. It cannot widen its own scope, because scope is read
-off the diff it produced.
+The interesting path is the one through `diagnose_with_llm`. When no rule
+matches, an LLM writes the patch — and that patch **still goes through the
+gate**. The model is one more proposer, not an authority. It cannot widen its own
+scope, because scope is read off the diff it produced.
 
 ## What interlock does and what the graph does
 

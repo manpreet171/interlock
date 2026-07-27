@@ -140,7 +140,7 @@ $ interlock log --verify
 | **Clearance** | Who says yes — and does a past yes still count? |
 | **Record** | What happened, written where it can be checked? |
 
-Depth, and the part most people skip for each: [`docs/pillars.md`](docs/pillars.md).
+Diagrams, depth, and the part most people skip: [`docs/pillars.md`](docs/pillars.md).
 
 ## The whole decision, in order
 
