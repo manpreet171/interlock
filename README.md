@@ -247,7 +247,7 @@ the railway down. It makes going fast survivable.
 
 ## Author
 
-**Manpreet Singh** · [LinkedIn](https://www.linkedin.com/in/manpreet17/) · [GitHub](https://github.com/manpreet171) · [Medium](https://medium.com/@singh.manpreet171900) · [Email](mailto:singh.manpreet171900@gmail.com)
+**Manpreet Singh** · [LinkedIn](https://www.linkedin.com/in/manpreet17/) · [GitHub](https://github.com/manpreet171) · [Medium](https://medium.com/@singh.manpreet171900) · [Email](mailto:info@singhlabs.dev)
 
 If you put this in front of a real pipeline, I would like to hear which failure
 class you added first and which bucket you put it in — those are the interesting

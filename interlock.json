@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/manpreet171/interlock/main/schema/policy.schema.json",
   "version": 1,
-  "owner": "Manpreet Singh <singh.manpreet171900@gmail.com>",
+  "owner": "Manpreet Singh <info@singhlabs.dev>",
   "mode": "normal",
   "scope": {
     "allow": [
