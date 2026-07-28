@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Self-healing CI, with a human interlock.<br/>It can fix it. May it?</strong></p>
 
-<p align="center">Created by <a href="https://www.linkedin.com/in/manpreet17/">Manpreet Singh</a></p>
+<p align="center">Created by <a href="https://www.linkedin.com/in/manpreet17/">Manpreet Singh</a> · Part of <a href="https://singhlabs.dev/interlock/">Singh Labs</a></p>
 
 <p align="center">
   <a href="#quickstart">Quickstart</a> · <a href="#the-four-pillars">Pillars</a> · <a href="#the-cli">CLI</a> · <a href="docs/manifesto.md">Manifesto</a> · <a href="docs/adoption.md">Adopt in 30 min</a> · <a href="integrations/langgraph/">LangGraph</a>
