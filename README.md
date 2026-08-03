@@ -9,7 +9,7 @@
 <p align="center">Created by <a href="https://www.linkedin.com/in/manpreet17/">Manpreet Singh</a> · Part of <a href="https://singhlabs.dev/interlock/">Singh Labs</a></p>
 
 <p align="center">
-  <a href="#quickstart">Quickstart</a> · <a href="#the-four-pillars">Pillars</a> · <a href="#the-cli">CLI</a> · <a href="docs/manifesto.md">Manifesto</a> · <a href="docs/adoption.md">Adopt in 30 min</a> · <a href="integrations/langgraph/">LangGraph</a>
+  <a href="#quickstart">Quickstart</a> · <a href="#the-four-pillars">Pillars</a> · <a href="#the-cli">CLI</a> · <a href="integrations/langgraph/">LangGraph</a>
 </p>
 
 <p align="center">
@@ -58,7 +58,6 @@ error looks like a config bug — or **fully manual**, where your best engineer
 spends an afternoon discovering a one-line fix.
 
 Interlock is the third answer: write the authority down, enforce it, record it.
-Full argument in [the manifesto](docs/manifesto.md).
 
 ## Quickstart
 
@@ -211,7 +210,7 @@ account, no dependencies — `interlock.json` and one `.mjs` file that reads a l
 and writes a JSON line.
 
 - **GitHub Actions** — one `if: failure()` step; exit codes distinguish held from
-  broken. See [adoption](docs/adoption.md).
+  broken.
 - **Slack** — `--slack` prints the payload, pipe it to `curl`. No app to install.
 - **LangGraph** — the [reference agent](integrations/langgraph/) uses
   `interrupt()` for the pause and interlock for the authority.
