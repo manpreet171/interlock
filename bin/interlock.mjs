@@ -72,7 +72,7 @@ function globToRe(glob) {
     } else if (ch === "?") re += "[^/]";
     else re += escapeRe(ch);
   }
-  return new RegExp("^" + re + "$");
+  return new RegExp("^" + re + "$", "i");  // paths are case-insensitive on Windows and macOS; Deploy.yml must not slip past deploy.yml
 }
 
 const matchesAny = (file, globs) =>
@@ -187,9 +187,18 @@ const CLASS_IDS = [...CLASSES.map((c) => c.id), "unknown"];
 // (or an LLM behind a person). Kept static so `lint` never depends on cwd.
 const AUTOFIXABLE = new Set(["missing-python-module", "set-output-deprecated", "lockfile-drift"]);
 
-function classify(rawLog) {
+// CLASSES is ordered most-specific-first, which has nothing to do with how
+// dangerous a failure is. A real log is noisy: a deprecation banner or an
+// optional-import warning sits above the actual failure, matches an earlier
+// class, and the verdict comes back AUTO on a log whose real failure is on the
+// refuse list. So refuse-listed classes are matched first, always.
+function classify(rawLog, refuseIds) {
   const text = normalize(rawLog);
-  for (const c of CLASSES) {
+  const refuse = new Set(refuseIds || []);
+  const ordered = refuse.size
+    ? [...CLASSES.filter((c) => refuse.has(c.id)), ...CLASSES.filter((c) => !refuse.has(c.id))]
+    : CLASSES;
+  for (const c of ordered) {
     const m = text.match(c.match);
     if (m) {
       return {
@@ -652,7 +661,10 @@ function analyse(root, f) {
   // The log is just a file on disk; --root is the checkout being patched.
   const log = readText(path.resolve(process.cwd(), String(logFile)));
   if (log === null) die(`cannot read ${logFile}`);
-  const res = classify(log);
+  // Hand the refuse list in so a never-touch failure cannot be masked by an
+  // earlier-listed benign one.
+  const refuseIds = loadPolicy(root)?.clearance?.refuse || [];
+  const res = classify(log, refuseIds);
   return { res, fp: fingerprint(res), proposal: propose(res, root) };
 }
 
@@ -740,7 +752,10 @@ function resolveHold(root, f, event) {
   if (!held) die(`no held decision with id ${id} — run "interlock log" to see what is waiting`);
   if (entries.some((e) => e.of === id)) die(`${id} was already resolved`);
 
-  const by = String(f.by || process.env.INTERLOCK_BY || process.env.USER || process.env.USERNAME || "");
+  // No $USER / $USERNAME fallback on purpose. Those are always set on a CI
+  // runner, so an agent could sign its own clearance and the README's promise
+  // ("refuses without --by") would be false. Naming a human has to be deliberate.
+  const by = String(f.by || process.env.INTERLOCK_BY || "");
   if (!by) die('say who is signing this off:  --by "Your Name"');
 
   appendLedger(root, policy, {
