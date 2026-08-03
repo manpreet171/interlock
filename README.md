@@ -63,10 +63,15 @@ Full argument in [the manifesto](docs/manifesto.md).
 ## Quickstart
 
 ```bash
-npx github:manpreet171/interlock init      # writes interlock.json
-gh run view 4471 --log-failed > run.log    # a build that actually broke
+npm install -g github:manpreet171/interlock   # installs the `interlock` command
+interlock init                                # writes interlock.json
+gh run view 4471 --log-failed > run.log       # a build that actually broke
 interlock gate run.log --repo acme/api --run 4471
 ```
+
+Install from the repo, not the bare npm name — `interlock` on npm belongs to an
+unrelated package. Prefer not to install globally? Prefix every command with
+`npx github:manpreet171/interlock` instead.
 
 ```
 missing-python-module  263819a52f2e
