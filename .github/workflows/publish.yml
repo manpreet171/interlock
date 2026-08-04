@@ -1,0 +1,43 @@
+name: publish
+
+# Publishing is manual on purpose — a bad release cannot be unpublished after
+# 72 hours, so nothing goes out because a branch moved.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 1.1.0). Must match package.json."
+        required: true
+
+permissions:
+  contents: read
+  id-token: write   # npm provenance: proves the package was built from this repo
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Version must match package.json
+        run: |
+          declared=$(node -p "require('./package.json').version")
+          if [ "$declared" != "${{ inputs.version }}" ]; then
+            echo "package.json says $declared, you asked for ${{ inputs.version }}"
+            exit 1
+          fi
+
+      - name: Tests must pass
+        run: npm test --if-present
+
+      - name: Show exactly what will ship
+        run: npm pack --dry-run
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
