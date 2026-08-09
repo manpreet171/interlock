@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Interlock — it can fix it, but may it?" width="100%"/>
+  <img src="assets/mark.png" alt="A robot reaching for a lever that is padlocked shut" width="300">
 </p>
 
 <h1 align="center">Interlock</h1>
